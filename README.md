@@ -1,2 +1,3 @@
 # tacotron2_hifitts
- Multispeaker tacotron2 modification
+
+tacotron2_train.ipynb

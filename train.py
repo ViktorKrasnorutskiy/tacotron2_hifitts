@@ -257,12 +257,15 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                         output_directory, "checkpoint_{}".format(iteration))
                     save_checkpoint(model, optimizer, learning_rate, iteration,
                                     checkpoint_path)
-                    
-                    
+
+                    print(i, 'of', len(train_loader))
                     ''' SAVE AT GOOGLE DRIVE '''
-                    drive_path = "/content/drive/MyDrive/logs/checkpoint_{}".format(iteration)
-                    save_checkpoint(model, optimizer, learning_rate, iteration,
+                    try:
+                        drive_path = "/content/drive/MyDrive/logs/checkpoint_{}".format(iteration)
+                        save_checkpoint(model, optimizer, learning_rate, iteration,
                                     drive_path)
+                    except Exception:
+                        print('EXCEPT WHEN SAVING CHECKPOINT AT GOOGLE DRIVE')
 
             iteration += 1
 

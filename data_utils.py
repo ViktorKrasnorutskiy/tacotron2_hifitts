@@ -31,10 +31,10 @@ class TextMelLoader(torch.utils.data.Dataset):
     def get_mel_text_pair(self, audiopath_and_text):
         # separate filename and text
         audiopath, text = audiopath_and_text[0], audiopath_and_text[1]
-        
+
         ''' ADD SPEAKER '''
         speaker_id = audiopath_and_text[2]
-        
+
         text = self.get_text(text)
         mel = self.get_mel(audiopath)
 
@@ -53,7 +53,7 @@ class TextMelLoader(torch.utils.data.Dataset):
             melspec = self.stft.mel_spectrogram(audio_norm)
             melspec = torch.squeeze(melspec, 0)
         else:
-            melspec = torch.from_numpy(np.load(filename))
+            melspec = torch.from_numpy(np.load(filename + '.npy'))
             assert melspec.size(0) == self.stft.n_mel_channels, (
                 'Mel dimension mismatch: given {}, expected {}'.format(
                     melspec.size(0), self.stft.n_mel_channels))
@@ -114,7 +114,7 @@ class TextMelCollate():
             gate_padded[i, mel.size(1)-1:] = 1
             output_lengths[i] = mel.size(1)
 
-        
+
         ''' ADD SPEAKER '''
         speaker_ids = []
         for i in range(len(ids_sorted_decreasing)):

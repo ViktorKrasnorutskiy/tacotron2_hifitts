@@ -11,7 +11,7 @@ def get_mask_from_lengths(lengths):
 
     #ids = torch.arange(0, max_len, out=torch.cuda.LongTensor(max_len))
     ids = torch.arange(0, max_len, out=torch.LongTensor(max_len).to(device))
-    
+
     mask = (ids < lengths.unsqueeze(1)).bool()
     return mask
 
@@ -20,7 +20,7 @@ def get_mask_from_lengths(lengths):
 #    sampling_rate, data = read(full_path)
 #    return torch.FloatTensor(data.astype(np.float32)), sampling_rate
 def load_flac_to_torch(path):
-    full_path = '/content/tacotron2/hifitts/'+path
+    full_path = '/content/tacotron2/'+path
     data, sampling_rate = sf.read(full_path)
     return torch.FloatTensor(data.astype(np.float32)), sampling_rate
 

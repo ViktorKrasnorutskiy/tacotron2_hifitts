@@ -10,7 +10,7 @@ def create_hparams(hparams_string=None, verbose=False):
         # Experiment Parameters        #
         ################################
         epochs=500, # 2,
-        iters_per_checkpoint=1000, # 5,
+        iters_per_checkpoint=500, # 5,
         seed=1234,
         dynamic_loss_scaling=True,
         fp16_run=False,
@@ -24,9 +24,9 @@ def create_hparams(hparams_string=None, verbose=False):
         ################################
         # Data Parameters             #
         ################################
-        load_mel_from_disk=False,
-        training_files='hifitts/hifitts_train.txt',
-        validation_files='hifitts/hifitts_test.txt',
+        load_mel_from_disk=True,
+        training_files='hifitts/train.txt',
+        validation_files='hifitts/test.txt',
         text_cleaners=['english_cleaners'],
 
         ################################
@@ -85,7 +85,7 @@ def create_hparams(hparams_string=None, verbose=False):
         learning_rate=1e-3,
         weight_decay=1e-6,
         grad_clip_thresh=1.0,
-        batch_size=64, #4,
+        batch_size=4, #64,
         mask_padding=True  # set model's padded outputs to padded values
     )
 

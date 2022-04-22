@@ -216,7 +216,7 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
             for param_group in optimizer.param_groups:
                 param_group['lr'] = learning_rate
 
-            model.zero_grad()
+            #model.zero_grad()
             x, y = model.parse_batch(batch)
             y_pred = model(x)
 
@@ -239,7 +239,10 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                 grad_norm = torch.nn.utils.clip_grad_norm_(
                     model.parameters(), hparams.grad_clip_thresh)
 
-            optimizer.step()
+            #optimizer.step()
+            if i % 2 == 0:
+                optimizer.step()
+                model.zero_grad()
 
             if not is_overflow and rank == 0:
                 duration = time.perf_counter() - start
@@ -259,13 +262,14 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                                     checkpoint_path)
 
                     print(i, 'of', len(train_loader))
-                    ''' SAVE AT GOOGLE DRIVE '''
-                    try:
-                        drive_path = "/content/drive/MyDrive/logs/checkpoint_{}".format(iteration)
-                        save_checkpoint(model, optimizer, learning_rate, iteration,
-                                    drive_path)
-                    except Exception:
-                        print('EXCEPT WHEN SAVING CHECKPOINT AT GOOGLE DRIVE')
+
+                    #''' SAVE AT GOOGLE DRIVE '''
+                    #try:
+                    #    drive_path = "/content/drive/MyDrive/logs/checkpoint_{}".format(iteration)
+                    #    save_checkpoint(model, optimizer, learning_rate, iteration,
+                    #                drive_path)
+                    #except Exception:
+                    #    print('EXCEPT WHEN SAVING CHECKPOINT AT GOOGLE DRIVE')
 
             iteration += 1
 

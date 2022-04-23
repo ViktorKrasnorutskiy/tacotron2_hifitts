@@ -20,8 +20,7 @@ def get_mask_from_lengths(lengths):
 #    sampling_rate, data = read(full_path)
 #    return torch.FloatTensor(data.astype(np.float32)), sampling_rate
 def load_flac_to_torch(path):
-    full_path = '/content/tacotron2/'+path
-    data, sampling_rate = sf.read(full_path)
+    data, sampling_rate = sf.read(path)
     return torch.FloatTensor(data.astype(np.float32)), sampling_rate
 
 

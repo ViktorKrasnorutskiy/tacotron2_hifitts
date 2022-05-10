@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>text2speech project</title>
+    <style>
+      * {
+        margin:0;
+        color: #111;
+        font-weight: normal;
+        font-family: system-ui;
+        border-style: none;
+        font-size: 14px;
+      }
+      body {
+        background: whitesmoke;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: auto;
+      }
+      #container {
+        padding:10px;
+        background: white;
+        display:grid;
+        grid-template-rows: repeat(11, 1fr);
+        color:gray;
+        width: 300px;
+        height: 300px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+        border-radius: 10px;
+      }
+      audio::-webkit-media-controls-panel {
+        background-color: whitesmoke;
+      }
+      .speaker_row {
+        width: 100%;
+        height: 100%;
+      }
+      label {
+        cursor: pointer;
+        transition: 0.3s;
+        padding-left: 10px;
+      }
+      label:hover {
+        color: #FF0066;
+      }
+      input {outline:none; transition:0.3s;}
+      input[type='radio']:after {
+          cursor:pointer;
+          width: 15px;
+          height: 15px;
+          border-radius: 15px;
+          top: -2px;
+          left: -1px;
+          position: relative;
+          background-color: whitesmoke;
+          content: '';
+          display: inline-block;
+          visibility: visible;
+          border: 2px solid white;
+      }
+      input[type="radio"]:checked+label{
+        color: #FF0066;
+      }
+      input[type='radio']:checked:after {
+          cursor:pointer;
+          width: 15px;
+          height: 15px;
+          border-radius: 15px;
+          top: -2px;
+          left: -1px;
+          position: relative;
+          background-color: #FF0066;
+          content: '';
+          display: inline-block;
+          visibility: visible;
+          border: 2px solid white;
+      }
+      #submit_row {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+      }
+      #text {
+        background: white;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        box-shadow:0px 0px 0px 1px whitesmoke inset;
+        text-align: center;
+        color:#FF0066;
+        transition: .3s;
+      }
+      #text:hover {
+        box-shadow:0px 0px 0px 1px #FF0066 inset;
+      }
+      #synth_btn {
+        cursor: pointer;
+        color:black;
+        background:whitesmoke;
+        transition: .3s;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+      }
+      #synth_btn:hover {
+        background:#FF0066;
+        color:white;
+      }
+      #descriptions_title {
+        color:black;
+        width: 300px;
+        height: 50px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 430px;
+        left: 0;
+        margin: auto;
+        font-weight: bold;
+        font-size: 25px;
+        text-align: center;
+      }
+
+      #container_shadow {
+        opacity: 0;
+        transition: 0.5s;
+        position: absolute;
+        width: 315px;
+        height: 315px;
+        top: 15px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+        z-index: -1;
+        transform: scale(0.9) translateZ(0);
+        filter: blur(30px);
+        background: linear-gradient(to left, #0087cd, #42E3B4, #21BA72, #A0E720, #FAED00, #FF8000, #FF0066);
+        background-size: 200% 200%;
+        -webkit-animation: animateGlow 1.5s linear infinite;
+                animation: animateGlow 1.5s linear infinite;
+      }
+      @-webkit-keyframes animateGlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 200% 50%;
+        }
+      }
+      @keyframes animateGlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 200% 50%;
+        }
+      }
+
+      #waiting_text {
+        color: black;
+        text-align: center;
+        width: 350px;
+        height: 50px;
+        position: absolute;
+        top: 480px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+      }
+      #audio_container {
+        width: 300px;
+        height: 50px;
+        position: absolute;
+        top: 450px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+      }
+    </style>
+</head>
+<body>
+
+  <div id="descriptions_title">Сервис синтеза речи</div>
+
+  <div id="container_shadow" hidden></div>
+  <div id="container">
+    <div class="speaker_row">
+      <input type="radio" id="92" name="speaker" value="9" checked>
+      <label for="92"> Cori Samuel [Ж]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="6097" name="speaker" value="3">
+      <label for="6097"> Phil Benson [М]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="9017" name="speaker" value="7">
+      <label for="9017"> John Van Stan [М]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="6670" name="speaker" value="4">
+      <label for="6670"> Mike Pelton [М]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="6671" name="speaker" value="5">
+      <label for="6671"> Tony Oliva [М]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="8051" name="speaker" value="6">
+      <label for="8051"> Maria Kasper [Ж]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="9136" name="speaker" value="8">
+      <label for="9136"> Helen Taylor [Ж]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="11614" name="speaker" value="0">
+      <label for="11614"> Sylviamb [Ж]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="12787" name="speaker" value="8">
+      <label for="12787"> Celine Major [Ж]</label>
+    </div>
+
+    <div class="speaker_row">
+      <input type="radio" id="11697" name="speaker" value="1">
+      <label for="11697"> Like Many Waters [Ж]</label>
+    </div>
+
+    <div id="submit_row">
+      <input type="text" id="text" name="text" required>
+      <input type="submit" id="synth_btn" value="Озвучить"
+        onclick='send_post_request(); return false;'>
+    </div>
+
+  </div>
+
+  <div id='audio_container'></div>
+
+  <div id='waiting_text' hidden>Идет процесс синтеза<br>(может занять до 2 минут)</div>
+
+    <script type="text/javascript" charset="utf-8">
+
+      // VARIABLES
+      var waiting_response = false
+      const container = document.getElementById('container')
+      const waiting_text = document.getElementById('waiting_text')
+      const container_shadow = document.getElementById('container_shadow')
+      const audio_container = document.getElementById('audio_container')
+
+      // ASYNC POST REQUEST METHOD
+      const send_post_request = async () => {
+
+        // GET VALUES
+        const text = document.getElementById('text').value
+        var speaker = 0
+        const speakers = document.getElementsByName('speaker')
+        for (var i=0; i<speakers.length; i++){
+          if (speakers[i].checked) { speaker = speakers[i].value }
+        };
+
+        // CONSTRUCT POST REQUEST
+        const data = {
+          text: text,
+          speaker: speaker
+        };
+        const options = {
+          method: 'post',
+          body: JSON.stringify(data)
+        };
+        const url = '{{ data.server_ip }}' + 'synthesize/';
+
+        // CHECK IF TEXT EMPTY OR HAVE ONLY SPACEC
+        if (!text.trim().length) {
+          alert('Необходимо ввести текст')
+
+        // CHECK FOR ALREADY WAITING RESPONSE
+        } else if (waiting_response) {
+          alert('Идет процесс генерации речи, ожидайте')
+
+        } else {
+          // CHANGE STATE OF WAITING_CONDITION AND WAITING_DOM_ELEMENT
+          waiting_response = true
+          waiting_text.hidden = false
+          container_shadow.hidden = false
+          container_shadow.style.opacity = '1.0'
+
+          // CLEAR AUDIO_PLAYER CONTAINER IF AUDIO_PLAYER ALREADY
+          if (audio_container.children.length != 0) {
+            audio_container.replaceChildren([])
+          }
+
+
+          const res = await fetch(url, options).then((response) => {
+            const reader = response.body.getReader();
+            const stream = new ReadableStream({
+              start(controller) {
+                // The following function handles each data chunk
+                function push() {
+                  // "done" is a Boolean and value a "Uint8Array"
+                  return reader.read().then(({ done, value }) => {
+                    // Is there no more data to read?
+                    if (done) {
+                      // Tell the browser that we have finished sending data
+                      controller.close();
+                      return;
+                    }
+                    // Get the data and send it to the browser via the controller
+                    controller.enqueue(value);
+                    push();
+                  });
+                };
+                push();
+              }
+            });
+            return new Response(stream, { headers: { "Content-Type": "audio/wav" } });
+          });
+
+          // GET RESPONSE BODY
+          const res_body = await res.body
+
+          // FUNC FOR MERGING TYPED_ARRAYS
+          function mergeTypedArraysUnsafe(a, b) {
+            var c = new a.constructor(a.length + b.length);
+            c.set(a);
+            c.set(b, a.length);
+            return c;
+          }
+
+          // PARSE READER CHUNKS WITH PARTS OF DATA AND SAVE IT INTO VARIABLE
+          const reader = res_body.getReader()
+          var readed_chunk = await reader.read()
+          var value = readed_chunk.value
+          while (readed_chunk.done == false) {
+            readed_chunk = await reader.read()
+            if (readed_chunk.value != undefined) {
+              value = mergeTypedArraysUnsafe(value, readed_chunk.value)
+            }
+          }
+
+          // SAVE FILE AT BUFFER WITH URL
+          const blob = new Blob([value], {type:'audio/wav'})
+          const blob_url = window.URL.createObjectURL(blob)
+
+          // INIT AUDIO_PLAYER WITH ADDED BLOB_URL AT SOURCE_SRC
+          const player = document.createElement('audio')
+          player.controls = 'controls'
+          const p_source = document.createElement('source')
+          p_source.type = 'audio/mpeg'
+          p_source.src = blob_url
+          audio_container.appendChild(player)
+          player.appendChild(p_source)
+
+          // CHANGE STATE OF WAITING_CONDITION AND WAITING_DOM_ELEMENT
+          waiting_response = false
+          waiting_text.hidden = true
+          container_shadow.hidden = true
+          container_shadow.style.opacity = '0.0'
+        }
+      }
+
+    </script>
+
+</body>
+
+</html>

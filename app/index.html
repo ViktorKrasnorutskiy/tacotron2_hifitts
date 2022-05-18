@@ -247,7 +247,7 @@
     </div>
 
     <div id="submit_row">
-      <input type="text" id="text" name="text" required>
+      <input type="text" id="text" name="text" autocomplete="off" required>
       <input type="submit" id="synth_btn" value="Озвучить"
         onclick='send_post_request(); return false;'>
     </div>
@@ -260,17 +260,30 @@
 
     <script type="text/javascript" charset="utf-8">
 
-      // VARIABLES
+
+      // Условие при ожидании ответа от сервера
       var waiting_response = false
+
+
+      // Необходимые DOM-элементы
       const container = document.getElementById('container')
       const waiting_text = document.getElementById('waiting_text')
       const container_shadow = document.getElementById('container_shadow')
       const audio_container = document.getElementById('audio_container')
 
-      // ASYNC POST REQUEST METHOD
+
       const send_post_request = async () => {
 
-        // GET VALUES
+        /*
+        Формирование и отправка POST запроса на сервер
+        с последующим получением ответа содержащего аудио-данные
+        При успешном получении ответа -
+          происходит добавление элемента (аудио-плеер) в DOM-дерево страницы
+          с возможностью проигрывания полученной аудио-записи
+        */
+
+
+        // Считывание данных указанных пользователем, для отправки
         const text = document.getElementById('text').value
         var speaker = 0
         const speakers = document.getElementsByName('speaker')
@@ -278,7 +291,8 @@
           if (speakers[i].checked) { speaker = speakers[i].value }
         };
 
-        // CONSTRUCT POST REQUEST
+
+        // Создание тела запроса
         const data = {
           text: text,
           speaker: speaker
@@ -289,42 +303,47 @@
         };
         const url = '{{ data.server_ip }}' + 'synthesize/';
 
-        // CHECK IF TEXT EMPTY OR HAVE ONLY SPACEC
+
+        // Проверка на наличие текста
         if (!text.trim().length) {
           alert('Необходимо ввести текст')
 
-        // CHECK FOR ALREADY WAITING RESPONSE
+
+        // Проверка на ожидание ответа от сервера (если запрос уже был отправлен ранее)
         } else if (waiting_response) {
           alert('Идет процесс генерации речи, ожидайте')
 
+
         } else {
-          // CHANGE STATE OF WAITING_CONDITION AND WAITING_DOM_ELEMENT
+
+
+          // Изменение глобальной переменной состояния ожидания (вкл)
           waiting_response = true
+
+
+          // Включение визуального эффекта ожидания
           waiting_text.hidden = false
           container_shadow.hidden = false
           container_shadow.style.opacity = '1.0'
 
-          // CLEAR AUDIO_PLAYER CONTAINER IF AUDIO_PLAYER ALREADY
+
+          // Убираем аудио-плеер, если он уже есть
           if (audio_container.children.length != 0) {
             audio_container.replaceChildren([])
           }
 
 
+          // Ответ от сервера (взято с документации mozilla)
           const res = await fetch(url, options).then((response) => {
             const reader = response.body.getReader();
             const stream = new ReadableStream({
               start(controller) {
-                // The following function handles each data chunk
                 function push() {
-                  // "done" is a Boolean and value a "Uint8Array"
                   return reader.read().then(({ done, value }) => {
-                    // Is there no more data to read?
                     if (done) {
-                      // Tell the browser that we have finished sending data
                       controller.close();
                       return;
                     }
-                    // Get the data and send it to the browser via the controller
                     controller.enqueue(value);
                     push();
                   });
@@ -335,10 +354,12 @@
             return new Response(stream, { headers: { "Content-Type": "audio/wav" } });
           });
 
-          // GET RESPONSE BODY
+
+          // Тело ответа
           const res_body = await res.body
 
-          // FUNC FOR MERGING TYPED_ARRAYS
+
+          // Функция для конкатенации типизированных массивов (в js их нельзя просто смерджить)
           function mergeTypedArraysUnsafe(a, b) {
             var c = new a.constructor(a.length + b.length);
             c.set(a);
@@ -346,7 +367,9 @@
             return c;
           }
 
-          // PARSE READER CHUNKS WITH PARTS OF DATA AND SAVE IT INTO VARIABLE
+
+          // "Ридер" передает данные чанками
+          // Поэтому их все необходимо считать и сформировать один типизированный массив
           const reader = res_body.getReader()
           var readed_chunk = await reader.read()
           var value = readed_chunk.value
@@ -357,11 +380,13 @@
             }
           }
 
-          // SAVE FILE AT BUFFER WITH URL
+
+          // Формирование blob объекта считанного аудио-файла с ссылкой на него
           const blob = new Blob([value], {type:'audio/wav'})
           const blob_url = window.URL.createObjectURL(blob)
 
-          // INIT AUDIO_PLAYER WITH ADDED BLOB_URL AT SOURCE_SRC
+
+          // Добавление аудио-плеера на страницу
           const player = document.createElement('audio')
           player.controls = 'controls'
           const p_source = document.createElement('source')
@@ -370,8 +395,12 @@
           audio_container.appendChild(player)
           player.appendChild(p_source)
 
-          // CHANGE STATE OF WAITING_CONDITION AND WAITING_DOM_ELEMENT
+
+          // Изменение глобальной переменной состояния ожидания (откл)
           waiting_response = false
+
+
+          // Включение визуального эффекта ожидания
           waiting_text.hidden = true
           container_shadow.hidden = true
           container_shadow.style.opacity = '0.0'
